@@ -1,6 +1,6 @@
-import java.awt.event.KeyEvent;
 import java.io.*;
-import java.security.Key;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -8,12 +8,8 @@ public class CipherApp {
 
     private Scanner scan;
     private Cipher cipher;
-
-    private int cipherType = 1; //1 = caesar, 2 = keyed and 3 = vigenere
-
-    private String keyFile = "key.txt";
-    private String plainTextFile;
-    private String cipherTextFile;
+    private int cipherType = 0; //0 = caesar, 1 = keyed and 2 = vigenere
+    private String[] keyFiles = {"caesarKey.txt", "keyedKey.txt", "vigenereKey.txt"};
 
     public static void main(String[] args) {
 
@@ -24,6 +20,7 @@ public class CipherApp {
 
     private void initialise() {
         cipher = new Caesar();
+
         menu();
     }
 
@@ -50,186 +47,209 @@ public class CipherApp {
 
             switch (response) {
                 case 1:
-                    cipher = new Caesar();
+                    selectCipher();
                     break;
                 case 2:
-                    cipher = new Keyed();
-                    break;
-                case 3:
-                    cipher = new Vigenere();
-                    break;
-                case 4:
                     editKey();
                     break;
+                case 3:
+                    inputPlainText();
+                    break;
+                case 4:
+                    inputCipherText();
+                    break;
                 case 5:
-                    showKey();
+                    displayKey();
                     break;
                 case 6:
-
+                    displayPlainText();
                     break;
                 case 7:
-
+                    displayCipherText();
                     break;
                 case 8:
-
+                    savePlainText();
                     break;
                 case 9:
-
+                    saveCipherText();
                     break;
                 case 10:
-
+                    cipher.Encrypt();
                     break;
                 case 11:
-
+                    cipher.Decrypt();
                     break;
                 case 12:
-
-                    break;
-                case 13:
-
-                    break;
-                case 14:
                     System.out.println("EXECUTION FINISHED");
                     break;
                 default:
                     System.out.println("Try again");
             }
-        } while (response != 14);
+        } while (response != 12);
     }
 
     private void printMenu() {
-        System.out.println("----CIPHER SELECTOR----");
-        System.out.println("1 - Use Caesar cipher");
-        System.out.println("2 - Use Keyed Caesar cipher");
-        System.out.println("3 - Use Vigenere Cipher\n");
-        System.out.println("----MODIFY INPUT VALUES----");
-        System.out.println("4 - Edit key");
-        System.out.println("5 - Display key");
-        System.out.println("6 - Input plain text file");
-        System.out.println("7 - Input cipher text file\n");
-        System.out.println("----OPERATIONS----");
-        System.out.println("8 - Encrypt");
-        System.out.println("9 - Display cipher text file");
-        System.out.println("10 - Save cipher text");
-        System.out.println("11 - Decrypt");
-        System.out.println("12 - Display plain text");
-        System.out.println("13 - Save plain text");
-        System.out.println("14 - Quit");
-    }
 
+        System.out.println("-->OPTIONS------------------------");
+        System.out.println("1 - Select cipher type");
+        System.out.println("-->INPUT VALUES-------------------");
+        System.out.println("2 - Edit key");
+        System.out.println("3 - Input plain text file");
+        System.out.println("4 - Input cipher text file");
+        System.out.println("-->DISPLAY VALUES-----------------");
+        System.out.println("5 - Display key");
+        System.out.println("6 - Display plain text");
+        System.out.println("7 - Display cipher text");
+        System.out.println("-->SAVE---------------------------");
+        System.out.println("8 - Save plain text to file");
+        System.out.println("9 - Save cipher text to file");
+        System.out.println("-->ENCRYPTION---------------------");
+        System.out.println("10 - Encrypt");
+        System.out.println("11 - Decrypt");
+        System.out.println("----------------------------------");
+        System.out.println("12 - Quit");
+    }
 
     private void cipherCheck(Cipher obj) {
 
         String cipher;
 
         if (obj instanceof Caesar) {
-            cipherType = 1;
+            cipherType = 0;
             cipher = "Caesar";
         } else if (obj instanceof Keyed) {
-            cipherType = 2;
+            cipherType = 1;
             cipher = "Keyed";
         } else {
-            cipherType = 3;
+            cipherType = 2;
             cipher = "Vigenere";
         }
 
         System.out.println("Current cipher: " + cipher);
     }
 
+    private void selectCipher() {
+
+        int option;
+        scan = new Scanner(System.in);
+
+        while (true) {
+            try {
+                System.out.println("Select one of the next options:");
+                System.out.println("1 - Use Caesar cipher \n2 - Use Keyed Caesar cipher \n3 - Use Vigenere Cipher ");
+                option = scan.nextInt();
+                scan.nextLine();
+                if (option > 0 && option < 4)
+                    break;
+            } catch (InputMismatchException ie) {
+                System.err.println("Please enter only numbers");
+                scan.next();
+            }
+        }
+
+        switch (option) {
+            case 1:
+                cipher = new Caesar();
+                break;
+            case 2:
+                cipher = new Keyed();
+                break;
+            case 3:
+                cipher = new Vigenere();
+                break;
+        }
+    }
+
     private void editKey() {
 
-        scan = new Scanner(System.in);
-        int exitControl = 0;
-        String key;
-
-        do {
-            System.out.println("Enter key value: ");
-            key = scan.nextLine();
-
-            //checks depending on cipher type
-            switch (cipherType) {
-                case 1:
-                    //check the key is just a number
-                    if (key.matches("[0-9]+")) {
-                        exitControl = 1;
-                        break;
-                    } else {
-                        System.err.println("Enter just a number");
-                        break;
-                    }
-                case 2:
-                    //check the key contains a shift number + something else(string key)
-                    int firstLetter = 0;
-                    StringBuilder sb = new StringBuilder();
-
-                    for (int i = 0; i < key.length(); i++){
-                        if(!Character.isDigit(key.charAt(i))) {
-                            firstLetter = i;
-                            break;
-                        }
-                    }
-                    for (int i = 0; i < firstLetter; i++){
-                        sb.append(key.charAt(i));
-                    }
-
-                    String shift = sb.toString();
-                    if (firstLetter != 0 && key.length() > shift.length()) {
-                        exitControl = 1;
-                        break;
-                    } else {
-                        System.err.println("Enter a number followed by a textual key");
-                        break;
-                    }
-                case 3:
-                    //check the key contains just chars from a-z A-Z
-                    if(key.matches("[a-zA-Z]+")){
-                        exitControl = 1;
-                        break;
-                    } else{
-                        System.err.println("Enter just letters a-z");
-                        break;
-                    }
-            }
-        } while (exitControl == 0);
-
-        //EDIT IN FILE
-        try {
-            File file = new File(keyFile);
-            PrintWriter outfile = new PrintWriter(file);
-            outfile.println(key);
-            outfile.close();
-
-        } catch (IOException e) {
-            System.err.println("An unexpected error occurred when trying to open the file " + keyFile);
-            System.err.println(e.getMessage());
-        }
-
-        //EDIT CIPHER CLASS KEY
+        String key = cipher.editKey();
         cipher.setKey(key);
-
-        //------> change to: 1-cipher.setKey(key) 2-cipher.updateKey
+        saveToFile(key, keyFiles[cipherType]);
     }
 
-    private void showKey() {
+    private void displayKey() {
+
+        String key = readFromFile(keyFiles[cipherType]);
+        System.out.println("Key: " + key);
+    }
+
+    private void inputPlainText() {
+
+        scan = new Scanner(System.in);
+        String plainText;
+
+        System.out.println("Enter the Plain text file name:");
+        String fileName = scan.nextLine();
+
+        plainText = readFromFile(fileName);
+        plainText = cipher.processText(plainText);
+
+        cipher.setPlainText(plainText);
+    }
+
+    private void displayPlainText() {
+        System.out.println(cipher.getPlainText());
+    }
+
+    private void inputCipherText() {
+
+        scan = new Scanner(System.in);
+        String cipherText;
+
+        System.out.println("Enter the Cipher text file name:");
+        String fileName = scan.nextLine();
+
+        cipherText = readFromFile(fileName);
+        cipherText = cipher.processText(cipherText);
+
+        cipher.setCipherText(cipherText);
+    }
+
+    private void displayCipherText() {
+        System.out.println(cipher.getCipherText());
+    }
+
+    private void savePlainText() {
+
+        scan = new Scanner(System.in);
+
+        System.out.println("Enter the text file name:");
+        String filename = scan.nextLine();
+
+        saveToFile(cipher.getPlainText(), filename);
+    }
+
+    private void saveCipherText() {
+
+        scan = new Scanner(System.in);
+
+        System.out.println("Enter the text file name:");
+        String filename = scan.nextLine();
+
+        saveToFile(cipher.getCipherText(), filename);
+    }
+
+    private String readFromFile(String fileName) {
+
+        String reading;
+
         try {
-            File file = new File(keyFile);
-            Scanner infile = new Scanner(file);
+            reading = new String(Files.readAllBytes(Paths.get(fileName)));
+            return reading;
 
-            String read = infile.nextLine();
-            System.out.println("Key: " + read);
-            infile.close();
-
-        } catch (FileNotFoundException e) {
-            System.err.println("The file: " + keyFile + " does not exist");
         } catch (IOException e) {
-            System.err.println("An unexpected error occurred when trying to open the file " + keyFile);
-            System.err.println(e.getMessage());
+            System.err.println("Error reading from file");
+        }
+        return "";
+    }
+
+    public void saveToFile(String outText, String fileName) {
+        try{
+            Files.write(Paths.get(fileName), outText.getBytes());
+        } catch (IOException e){
+            System.err.println("Error writing to file");
         }
     }
-
-
-
-
 
 
 }

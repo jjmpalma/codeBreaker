@@ -1,38 +1,39 @@
 public abstract class Cipher {
 
-        private String key;
-        private String plainText;
-        private String cipherText;
+    private String plainText;
+    private String cipherText;
+    private String key;
 
-        public String getKey() {
-                return key;
-        }
+    abstract void Encrypt();
 
-        public void setKey(String key) {
-                this.key = key;
-        }
+    abstract void Decrypt();
 
-        public String getPlainText() {
-                return plainText;
-        }
+    abstract String editKey();
 
-        public void setPlainText(String plainText) {
-                this.plainText = plainText;
-        }
+    public String getPlainText() {
+        return plainText;
+    }
 
-        public String getCipherText() {
-                return cipherText;
-        }
+    public void setPlainText(String plainText) {
+        this.plainText = plainText;
+    }
 
-        public void setCipherText(String cipherText) {
-                this.cipherText = cipherText;
-        }
+    public String getCipherText() {
+        return cipherText;
+    }
 
-        abstract void Encrypt();
-        abstract void Decrypt();
+    public void setCipherText(String cipherText) {
+        this.cipherText = cipherText;
+    }
 
-        //method update key in file
-        //method update plain text in file
-        //method update cipher text in file
+    public String getKey() { return key; }
 
+    public void setKey(String key) { this.key = key; }
+
+    public String processText(String text) {
+        text = text.replaceAll("[^A-Za-z]+", "");
+        text = text.toUpperCase();
+
+        return text;
+    }
 }
