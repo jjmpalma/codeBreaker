@@ -31,6 +31,7 @@ public class CipherApp {
 
         do {
             cipherCheck(cipher);
+            cipher.setKey(readFromFile(keyFiles[cipherType]));
             printMenu();
 
             while (true) {
