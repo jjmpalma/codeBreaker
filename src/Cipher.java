@@ -8,7 +8,7 @@ public abstract class Cipher {
 
     abstract void Decrypt();
 
-    abstract String editKey();
+    abstract boolean checkKey(String key);
 
     public String getPlainText() {
         return plainText;
@@ -36,4 +36,5 @@ public abstract class Cipher {
 
         return text;
     }
+
 }

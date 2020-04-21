@@ -62,7 +62,7 @@ public class Keyed extends Cipher {
 
             keyedIndex += 65;
 
-            sb.append((char)keyedIndex);
+            sb.append((char) keyedIndex);
         }
 
         super.setPlainText(sb.toString());
@@ -87,28 +87,17 @@ public class Keyed extends Cipher {
 
     }
 
+    public boolean checkKey(String key) {
 
-    public String editKey() {
-        //CHECK: key contains a shift number + something else(string key)
-        scan = new Scanner(System.in);
         String splitKey[];
-        String key;
 
-        while (true) {
+        splitKey = splitKey(key);
 
-            System.out.println("Enter key value: ");
-            key = scan.nextLine();
+        if (splitKey[0].length() != 0 && splitKey[1].length() != 0 && splitKey[1].matches("[a-zA-Z]+"))
+            return true;
+        else
+            return false;
 
-            splitKey = splitKey(key);
-
-            key = splitKey[0] + splitKey[1];
-
-            if (splitKey[0].length() != 0 && splitKey[1].length() != 0) {
-                return key;
-            } else {
-                System.err.println("Enter a number followed by a textual key");
-            }
-        }
     }
 
     private String[] splitKey(String key) {
@@ -134,9 +123,11 @@ public class Keyed extends Cipher {
         }
 
         splitKey[0] = sb1.toString();
-        splitKey[1] = super.processText(sb2.toString());
+        splitKey[1] = sb2.toString();
 
         return splitKey;
     }
+
+
 
 }

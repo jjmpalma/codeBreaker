@@ -9,7 +9,7 @@ public class CipherApp {
     private Scanner scan;
     private Cipher cipher;
     private int cipherType = 0; //0 = caesar, 1 = keyed and 2 = vigenere
-    private String[] keyFiles = {"caesarKey.txt", "keyedKey.txt", "vigenereKey.txt"};
+    private String[] keyFiles = {"keys/caesarKey.txt", "keys/keyedKey.txt", "keys/vigenereKey.txt"};
 
     public static void main(String[] args) {
 
@@ -31,7 +31,16 @@ public class CipherApp {
 
         do {
             cipherCheck(cipher);
-            cipher.setKey(readFromFile(keyFiles[cipherType]));
+
+            String key = readFromFile(keyFiles[cipherType]);
+
+            if(cipher.checkKey(key))
+                cipher.setKey(key);
+            else{
+                System.err.println("The key file in the following route: " + keyFiles[cipherType] + " contains an incorrect key format");
+                editKey();
+            }
+
             printMenu();
 
             while (true) {
@@ -163,9 +172,30 @@ public class CipherApp {
 
     private void editKey() {
 
-        String key = cipher.editKey();
-        cipher.setKey(key);
-        saveToFile(key, keyFiles[cipherType]);
+        while (true) {
+            System.out.println("Enter key value: ");
+            String key = scan.nextLine();
+
+            if (cipher.checkKey(key)) {
+                key = key.toUpperCase();
+                cipher.setKey(key);
+                saveToFile(key, keyFiles[cipherType]);
+                break;
+            } else{
+                switch (cipherType){
+                    case 0:
+                        System.err.println("Enter just numeric digits");
+                        break;
+                    case 1:
+                        System.err.println("Enter a number followed by a textual key from a-z");
+                        break;
+                    case 2:
+                        System.err.println("Enter just letters a-z");
+                        break;
+                }
+            }
+        }
+
     }
 
     private void displayKey() {

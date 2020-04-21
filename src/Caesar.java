@@ -42,22 +42,12 @@ public class Caesar extends Cipher {
         return sb.toString();
     }
 
-    public String editKey() {
-        //CHECK: key contains only digits
-        scan = new Scanner(System.in);
-        String key;
+    public boolean checkKey(String key) {
 
-        while (true) {
-            System.out.println("Enter key value: ");
-            key = scan.nextLine();
-
-            if (key.matches("-?[0-9]+")) {
-                return key;
-            } else
-                System.err.println("Enter just numeric digits");
-        }
+            if (key.matches("-?[0-9]+"))
+                return true;
+            else
+                return false;
     }
-
-
 }
 
