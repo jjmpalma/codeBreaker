@@ -1,3 +1,5 @@
+package uk.ac.aber.jmp16.codeBreaker;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,12 +17,11 @@ public class CipherApp {
 
         CipherApp app = new CipherApp();
         app.initialise();
-
     }
 
     private void initialise() {
-        cipher = new Caesar();
 
+        cipher = new Caesar();
         menu();
     }
 
@@ -32,22 +33,21 @@ public class CipherApp {
         do {
             cipherCheck(cipher);
 
+            //Set up key from file. When format is not correct ask for a new key
             String key = readFromFile(keyFiles[cipherType]);
-
-            if(cipher.checkKey(key))
+            if (cipher.checkKey(key))
                 cipher.setKey(key);
-            else{
+            else {
                 System.err.println("The key file in the following route: " + keyFiles[cipherType] + " contains an incorrect key format");
                 editKey();
             }
-
             printMenu();
 
             while (true) {
                 try {
                     System.out.println("Choose an option: ");
                     response = scan.nextInt();
-                    if (response > 0 && response < 15)
+                    if (response > 0 && response < 13)
                         break;
                 } catch (InputMismatchException e) {
                     System.err.println("Please enter a number");
@@ -85,9 +85,11 @@ public class CipherApp {
                     break;
                 case 10:
                     cipher.Encrypt();
+                    System.out.println("ENCRYPTION DONE!");
                     break;
                 case 11:
                     cipher.Decrypt();
+                    System.out.println("DECRYPTION DONE!");
                     break;
                 case 12:
                     System.out.println("EXECUTION FINISHED");
@@ -121,7 +123,6 @@ public class CipherApp {
     }
 
     private void cipherCheck(Cipher obj) {
-
         String cipher;
 
         if (obj instanceof Caesar) {
@@ -172,6 +173,8 @@ public class CipherApp {
 
     private void editKey() {
 
+        scan = new Scanner(System.in);
+
         while (true) {
             System.out.println("Enter key value: ");
             String key = scan.nextLine();
@@ -181,13 +184,13 @@ public class CipherApp {
                 cipher.setKey(key);
                 saveToFile(key, keyFiles[cipherType]);
                 break;
-            } else{
-                switch (cipherType){
+            } else {
+                switch (cipherType) {
                     case 0:
                         System.err.println("Enter just numeric digits");
                         break;
                     case 1:
-                        System.err.println("Enter a number followed by a textual key from a-z");
+                        System.err.println("Enter a number followed by a textual key from A-Z");
                         break;
                     case 2:
                         System.err.println("Enter just letters a-z");
@@ -195,13 +198,6 @@ public class CipherApp {
                 }
             }
         }
-
-    }
-
-    private void displayKey() {
-
-        String key = readFromFile(keyFiles[cipherType]);
-        System.out.println("Key: " + key);
     }
 
     private void inputPlainText() {
@@ -213,13 +209,9 @@ public class CipherApp {
         String fileName = scan.nextLine();
 
         plainText = readFromFile(fileName);
-        plainText = cipher.processText(plainText);
+        plainText = processText(plainText);
 
         cipher.setPlainText(plainText);
-    }
-
-    private void displayPlainText() {
-        System.out.println(cipher.getPlainText());
     }
 
     private void inputCipherText() {
@@ -231,33 +223,60 @@ public class CipherApp {
         String fileName = scan.nextLine();
 
         cipherText = readFromFile(fileName);
-        cipherText = cipher.processText(cipherText);
+        cipherText = processText(cipherText);
 
         cipher.setCipherText(cipherText);
     }
 
+    private void displayKey() {
+
+
+        String key = readFromFile(keyFiles[cipherType]);
+        System.out.println("Key: " + key);
+    }
+
+    private void displayPlainText() {
+
+        if (cipher.getPlainText() == null)
+            System.err.println("Plain text has not been input by the user");
+        else
+            System.out.println(cipher.getPlainText());
+    }
+
     private void displayCipherText() {
-        System.out.println(cipher.getCipherText());
+
+        if (cipher.getCipherText() == null)
+            System.err.println("Cipher text has not been input by the user");
+        else
+            System.out.println(cipher.getCipherText());
     }
 
     private void savePlainText() {
 
         scan = new Scanner(System.in);
 
-        System.out.println("Enter the text file name:");
-        String filename = scan.nextLine();
+        if (cipher.getPlainText() == null)
+            System.err.println("Plain text has not been input by the user");
+        else {
+            System.out.println("Enter the text file name:");
+            String filename = scan.nextLine();
 
-        saveToFile(cipher.getPlainText(), filename);
+            saveToFile(cipher.getPlainText(), filename);
+        }
     }
 
     private void saveCipherText() {
 
         scan = new Scanner(System.in);
 
-        System.out.println("Enter the text file name:");
-        String filename = scan.nextLine();
+        if (cipher.getCipherText() == null)
+            System.err.println("Cipher text has not been input by the user");
+        else {
+            System.out.println("Enter the text file name:");
+            String filename = scan.nextLine();
 
-        saveToFile(cipher.getCipherText(), filename);
+            saveToFile(cipher.getCipherText(), filename);
+        }
     }
 
     private String readFromFile(String fileName) {
@@ -274,13 +293,19 @@ public class CipherApp {
         return "";
     }
 
-    public void saveToFile(String outText, String fileName) {
-        try{
+    private void saveToFile(String outText, String fileName) {
+        try {
             Files.write(Paths.get(fileName), outText.getBytes());
-        } catch (IOException e){
+        } catch (IOException e) {
             System.err.println("Error writing to file");
         }
     }
 
+    private String processText(String text) {
+        text = text.replaceAll("[^A-Za-z]+", "");
+        text = text.toUpperCase();
+
+        return text;
+    }
 
 }
