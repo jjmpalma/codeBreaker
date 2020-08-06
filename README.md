@@ -1,6 +1,6 @@
 # codeBreaker
 
-Java CLI app to encrypt and decript between three ciphers:
+Java CLI app to encrypt and decrypt between three ciphers:
 - Caesar Cipher Shift
 - Keyed Caesar Cipher
 - Vigenère Cipher
